@@ -5,6 +5,6 @@ class Singer < ApplicationRecord
     other: "other"
   }
 
-  has_many :music, dependent: :destroy
+  has_many :musics, dependent: :destroy
   validates :name, uniqueness: true
 end

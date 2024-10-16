@@ -4,7 +4,7 @@ class CreateMusics < ActiveRecord::Migration[7.2]
       t.string :title, null: false
       t.string :album_name, null: false
       t.string :genre, null: false
-      t.belongs_to :singers
+      t.belongs_to :singer
 
       t.timestamps
     end
