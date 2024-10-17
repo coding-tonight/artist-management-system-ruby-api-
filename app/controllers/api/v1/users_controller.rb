@@ -3,9 +3,23 @@ class Api::V1::UsersController < ApplicationController
   before_action :check_login, only: %i[index show update]
   before_action :check_owner, only: %i[update destory]
 
+  include Pagination
+
   def index
-    @users = User.all
-    render json: @users
+    @users = User::select(:id, :first_name, :last_name, :email).page(current_page).per(per_page).order(:id)
+
+    options = {
+      links: {
+      current: api_v1_users_path(page: @users.current_page),
+      first: api_v1_users_path(page: 1),
+      last: api_v1_users_path(page: @users.total_pages),
+      prev: api_v1_users_path(page: @users.prev_page),
+      next: api_v1_users_path(page: @users.next_page),
+      total_page: @users.total_pages,
+      total: @users.count
+      }
+    }
+    render_success_response(data: { users: @users , **options }, message: "success")
   end
 
   def create

@@ -2,13 +2,25 @@ class Api::V1::MusicsController < ApplicationController
   before_action :check_login , only: %i[ index show  update  destory ]
   before_action :set_music , only: %i[ show update destory ]
 
+  include Pagination
+
  def index 
-   @musics = Music.all
-   render_success_response(data: { musics: @musics }, message: "success")
+   @musics = Music.page(current_page).per(per_page)
+   options = {
+        links: {
+        current: api_v1_musics_path(page: @musics.current_page),
+        first: api_v1_musics_path(page: 1),
+        last: api_v1_musics_path(page: @musics.total_pages),
+        prev: api_v1_musics_path(page: @musics.prev_page),
+        next: api_v1_musics_path(page: @musics.next_page),
+        total_page: @musics.total_pages,
+        total: @music.count
+        }
+    }
+   render_success_response(data: { musics: @musics , **options }, message: "success")
  end
 
  def create
-   puts music_params
    @music = Music.new(music_params)
 
    if @music.save
@@ -45,8 +57,4 @@ class Api::V1::MusicsController < ApplicationController
  def music_params
    params.require(:music).permit(:title, :album_name, :genre, :singer_id)
  end
-
-#  def singer_params
-#    params.require(:singer).permit(:id)
-#  end
 end

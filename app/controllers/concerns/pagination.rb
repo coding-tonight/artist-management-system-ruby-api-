@@ -2,10 +2,10 @@ module Pagination
    protected
 
    def current_page
-    (params[:page] || 1).to_i
+    (params[:page] || 1)
    end
 
    def per_page
-    (params[:per_page] || 20).to_i
+    (params[:per_page] || 4)
    end
 end

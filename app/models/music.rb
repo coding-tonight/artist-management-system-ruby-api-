@@ -1,11 +1,8 @@
 class Music < ApplicationRecord
-  enum genre: {
-    rnb: "rnb",
-    country: "country",
-    classic: "classic",
-    rock: "rock",
-    jazz: "jazz"
-  }
+
+  enum genre: [ :rnb, :country, :classic, :rock, :jazz ]
+
+  validates :genre, inclusion: { in: genres.keys }
 
   belongs_to :singer
 end
