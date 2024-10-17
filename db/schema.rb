@@ -11,14 +11,17 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.2].define(version: 2024_10_16_092553) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "musics", force: :cascade do |t|
     t.string "title", null: false
     t.string "album_name", null: false
     t.string "genre", null: false
-    t.integer "singers_id"
+    t.bigint "singer_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["singers_id"], name: "index_musics_on_singers_id"
+    t.index ["singer_id"], name: "index_musics_on_singer_id"
   end
 
   create_table "singers", force: :cascade do |t|

@@ -13,7 +13,7 @@ module ApiResponseHandler
     }, status)
   end
 
-  def render_succss_response(data: {}, message: "", status: 200)
+  def render_success_response(data: {}, message: "", status: 200, meta: {})
     json_response({
       success: true,
       message:,
@@ -22,8 +22,8 @@ module ApiResponseHandler
     }, status)
   end
 
-  def meta_attributes(collection, extra_meta)
-     [] if collection.blank?
+  def meta_attributes(collection, extra_meta =  {})
+     return [] if collection.blank?
 
      {
        pagination: {

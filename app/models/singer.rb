@@ -6,5 +6,6 @@ class Singer < ApplicationRecord
   }
 
   has_many :musics, dependent: :destroy
+  accepts_nested_attributes_for :musics
   validates :name, uniqueness: true
 end

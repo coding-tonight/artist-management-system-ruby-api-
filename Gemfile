@@ -45,3 +45,9 @@ end
 gem "bcrypt", "~> 3.1"
 
 gem "jwt", "~> 2.9"
+
+gem "dotenv-rails", "~> 3.1"
+
+gem "pg", "~> 1.5"
+
+gem "kaminari", "~> 1.2"
