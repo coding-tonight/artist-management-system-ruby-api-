@@ -1,24 +1,14 @@
 class Api::V1::SingersController < ApplicationController
-  before_action :check_login , only: %i[index create show update destory ]
-  before_action :set_singer , only: %i[ update show destory ]
+  before_action :check_login, only: %i[ index create show update destory ]
+  before_action :set_singer, only: %i[ update show destory ]
 
-  include Pagination
+  before_action only: %i[ update show destory index ] do has_permission([ "super_admin" ]) end
+
+  include SingerConcern
 
   def index
-    @singers = Singer.order(:name).page params[:page]
-    
-    options = {
-        links: {
-        current: api_v1_singers_path(page: @singers.current_page),
-        first: api_v1_singers_path(page: 1),
-        last: api_v1_singers_path(page: @singers.total_pages),
-        prev: api_v1_singers_path(page: @singers.prev_page),
-        next: api_v1_singers_path(page: @singers.next_page),
-        total_page: @singers.total_pages,
-        total: @singers.count
-        }
-    }
-    render_success_response(data: { singers: @singers , **options }, message: 'Singer created successfully')
+    @singers = retrive_singers()
+    render_success_response(data: { singers: @singers }, meta: @singers, message: "Singer created successfully")
   end
 
   def create
@@ -30,27 +20,42 @@ class Api::V1::SingersController < ApplicationController
       render_error_response(@singer.errors, message: "errors")
     end
   end
-  
+
   def show
     render_success_response(data: @singer, message: "success")
   end
 
-  def update 
+  def update
     if @singer.update(singer_params)
-       render_success_response(data: @singer, message: 'Singer updated successfully')
+       render_success_response(data: @singer, message: "Singer updated successfully")
     else
-      render_error_response(@singer.errors, message: 'errors')
+      render_error_response(@singer.errors, message: "errors")
     end
   end
-
 
   def destory
     @singer.destory
     head 204
   end
 
-  private 
-  
+  def singermusics
+    @musics = retrive_singer_musics.page(current_page).per(per_page)
+    render_success_response(data: @musics, message: "success")
+  end
+
+  def import
+    # import data form the csv
+    Singer.import(params[:file])
+    render_success_response(message: "Successfully imported csv data")
+  end
+
+  def export
+    @file = Singer.to_csv
+    send_data @file, fileName: "singers.csv", type: "text/csv; charset=iso-8859-1; header=present"
+  end
+
+  private
+
   def set_singer
     @singer = Singer.find(params[:id])
   end

@@ -51,3 +51,5 @@ gem "dotenv-rails", "~> 3.1"
 gem "pg", "~> 1.5"
 
 gem "kaminari", "~> 1.2"
+
+gem "active_model_serializers", "~> 0.10.0"

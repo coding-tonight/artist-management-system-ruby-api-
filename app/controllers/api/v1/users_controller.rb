@@ -3,32 +3,20 @@ class Api::V1::UsersController < ApplicationController
   before_action :check_login, only: %i[index show update]
   before_action :check_owner, only: %i[update destory]
 
-  include Pagination
+  before_action only: %i[ update show destory index ] do has_permission([ "super_admin" ]) end
+
+  include UserConcern
 
   def index
-    @users = User::select(:id, :first_name, :last_name, :email).page(current_page).per(per_page).order(:id)
-
-    options = {
-      links: {
-      current: api_v1_users_path(page: @users.current_page),
-      first: api_v1_users_path(page: 1),
-      last: api_v1_users_path(page: @users.total_pages),
-      prev: api_v1_users_path(page: @users.prev_page),
-      next: api_v1_users_path(page: @users.next_page),
-      total_page: @users.total_pages,
-      total: @users.count
-      }
-    }
-    render_success_response(data: { users: @users , **options }, message: "success")
+    @users = retreve_users
+    render_success_response(data: { users: @users }, meta: @users, message: "success")
   end
 
   def create
     @user = User.new(user_params)
 
     if @user.save
-      render json: {
-         status: "success", "messaage": "success"
-          }, status: :created
+      render_success_response(data: @user, message: "success")
     else
       render json: @user.errors, status: :unprocessable_entity
     end
@@ -62,7 +50,7 @@ class Api::V1::UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(
-      :email, :password, :dob, :address, :first_name, :last_name
+      :email, :password, :dob, :address, :first_name, :last_name, :gender, :role
       )
   end
 end

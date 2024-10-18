@@ -1,45 +1,34 @@
 class Api::V1::MusicsController < ApplicationController
-  before_action :check_login , only: %i[ index show  update  destory ]
-  before_action :set_music , only: %i[ show update destory ]
+  before_action :check_login, only: %i[ index show update destory ]
+  before_action :set_music, only: %i[ show update destory ]
 
-  include Pagination
+  before_action only: %i[ update show destory index ] do has_permission([ "super_admin" ]) end
 
- def index 
+ def index
    @musics = Music.page(current_page).per(per_page)
-   options = {
-        links: {
-        current: api_v1_musics_path(page: @musics.current_page),
-        first: api_v1_musics_path(page: 1),
-        last: api_v1_musics_path(page: @musics.total_pages),
-        prev: api_v1_musics_path(page: @musics.prev_page),
-        next: api_v1_musics_path(page: @musics.next_page),
-        total_page: @musics.total_pages,
-        total: @music.count
-        }
-    }
-   render_success_response(data: { musics: @musics , **options }, message: "success")
+   render_success_response(data: { musics: @musics }, meta: @musics, message: "success")
  end
 
  def create
    @music = Music.new(music_params)
 
    if @music.save
-     render_success_response( data: @music , message: "Music created successfully")
+     render_success_response(data: @music, message: "Music created successfully")
    else
-     render_error_response( data: @music.errors, message: "errors")
+     render_error_response(data: @music.errors, message: "errors")
    end
  end
 
  def show
-   render_success_response(data: @music , message: "success")
+   render_success_response(data: @music, message: "success")
  end
 
 
  def update
   if @music.update(music_params)
-    render_success_response( data: @music , message: "Music updated successfully")
+    render_success_response(data: @music, message: "Music updated successfully")
   else
-    render_error_response( data: @music.errors , message: "errors")
+    render_error_response(data: @music.errors, message: "errors")
   end
  end
 
@@ -48,7 +37,7 @@ class Api::V1::MusicsController < ApplicationController
    head 204
  end
 
- private 
+ private
 
  def set_music
    @music = Music.find(params[:id])
@@ -58,3 +47,16 @@ class Api::V1::MusicsController < ApplicationController
    params.require(:music).permit(:title, :album_name, :genre, :singer_id)
  end
 end
+
+
+# for future references
+
+#  options = {
+#       current: api_v1_musics_path(page: @musics.current_page),
+#       first: api_v1_musics_path(page: 1),
+#       last: api_v1_musics_path(page: @musics.total_pages),
+#       prev: api_v1_musics_path(page: @musics.prev_page),
+#       next: api_v1_musics_path(page: @musics.next_page),
+#       total_page: @musics.total_pages,
+#       total: @musics.count
+#   }
