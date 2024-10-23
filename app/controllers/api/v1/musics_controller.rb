@@ -1,12 +1,15 @@
 class Api::V1::MusicsController < ApplicationController
-  before_action :check_login, only: %i[ index show update destory ]
-  before_action :set_music, only: %i[ show update destory ]
+  before_action :check_login, only: %i[ index show update destroy ]
+  before_action :set_music, only: %i[ show update destroy ]
 
-  before_action only: %i[ update show destory index ] do has_permission([ "super_admin" ]) end
+  before_action only: %i[ update show destroy index ] do has_permission([ "super_admin", "artist_manager", "artist" ]) end
+
+
+ include MusicConcern
 
  def index
-   @musics = Music.page(current_page).per(per_page)
-   render_success_response(data: { musics: @musics }, meta: @musics, message: "success")
+   @musics = retrive_musics
+    render_success_response(data: { musics: @musics }, meta: @musics, message: "success")
  end
 
  def create
@@ -25,6 +28,7 @@ class Api::V1::MusicsController < ApplicationController
 
 
  def update
+  puts @music
   if @music.update(music_params)
     render_success_response(data: @music, message: "Music updated successfully")
   else
@@ -32,31 +36,22 @@ class Api::V1::MusicsController < ApplicationController
   end
  end
 
- def destory
-   @music.destory
-   head 204
+ def destroy
+   @music.destroy
+   render_success_response(message: "Successfully deleted")
  end
 
  private
 
  def set_music
-   @music = Music.find(params[:id])
+  begin
+    @music = Music.find(params[:id])
+  rescue ActiveRecord::RecordNotFound => e
+    raise e
+  end
  end
 
  def music_params
    params.require(:music).permit(:title, :album_name, :genre, :singer_id)
  end
 end
-
-
-# for future references
-
-#  options = {
-#       current: api_v1_musics_path(page: @musics.current_page),
-#       first: api_v1_musics_path(page: 1),
-#       last: api_v1_musics_path(page: @musics.total_pages),
-#       prev: api_v1_musics_path(page: @musics.prev_page),
-#       next: api_v1_musics_path(page: @musics.next_page),
-#       total_page: @musics.total_pages,
-#       total: @musics.count
-#   }

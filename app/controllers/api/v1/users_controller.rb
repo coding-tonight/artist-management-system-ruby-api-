@@ -1,9 +1,9 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :set_user, only: %i[show update destory]
-  before_action :check_login, only: %i[index show update]
-  before_action :check_owner, only: %i[update destory]
+  before_action :set_user, only: %i[ show update destroy ]
+  before_action :check_login, only: %i[ index show update destroy ]
+  # before_action :check_owner, only: %i[ update ]
 
-  before_action only: %i[ update show destory index ] do has_permission([ "super_admin" ]) end
+  before_action only: %i[ update show destroy index ] do has_permission([ "super_admin" ]) end
 
   include UserConcern
 
@@ -13,12 +13,23 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def create
-    @user = User.new(user_params)
+    ActiveRecord::Base.transaction do
+      begin
+        @role = "artist" unless user_params[:role]
+        @user = User.new(**user_params, role: @role)
 
-    if @user.save
-      render_success_response(data: @user, message: "success")
-    else
-      render json: @user.errors, status: :unprocessable_entity
+        if @user.save
+          if @role == "artist"
+            reigster_artist(@user)
+          end
+          render_success_response(message: "User register successfully")
+        else
+          render json: @user.errors, status: :unprocessable_entity
+        end
+      rescue => e
+        Rails.logger.error "Transaction failed: #{e.message}"
+        raise ActiveRecord::Rollback
+      end
     end
   end
 
@@ -34,14 +45,17 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
-  def destory
-    @user.destory
-    head 204
+  def destroy
+    @user.destroy
+    render_success_response(message: "Successfully deleted")
   end
+
 
   private
   def set_user
-    @user = User.find(params[:id])
+    @user = User.select(
+     :id, :email, :first_name, :last_name, :gender, :role, :address, :dob, :phone
+    ).find(params[:id])
   end
 
   def check_owner
@@ -50,7 +64,7 @@ class Api::V1::UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(
-      :email, :password, :dob, :address, :first_name, :last_name, :gender, :role
+      :email, :password, :dob, :address, :first_name, :last_name, :gender, :role, :phone
       )
   end
 end

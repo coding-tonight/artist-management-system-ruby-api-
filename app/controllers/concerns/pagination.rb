@@ -6,6 +6,6 @@ module Pagination
    end
 
    def per_page
-    (params[:per_page] || 4)
+    (params[:per_page] || 10)
    end
 end

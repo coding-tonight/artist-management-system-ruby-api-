@@ -1,7 +1,8 @@
 class User < ApplicationRecord
-
   enum role: %i[super_admin artist_manager artist]
   enum gender: %i[male female other]
+
+  has_one :singer
 
   validates :email, uniqueness: true
   validates_format_of :email, with: /@/, format: URI::MailTo::EMAIL_REGEXP

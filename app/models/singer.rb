@@ -5,6 +5,7 @@ class Singer < ApplicationRecord
   enum gender: [ :male, :female, :other ]
 
   has_many :musics, dependent: :destroy
+  belongs_to :user, foreign_key: "user_id"
   accepts_nested_attributes_for :musics
   validates :name, uniqueness: true
   validates :gender, inclusion: { in: genders.keys }

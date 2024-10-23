@@ -1,8 +1,8 @@
 class Api::V1::SingersController < ApplicationController
-  before_action :check_login, only: %i[ index create show update destory ]
-  before_action :set_singer, only: %i[ update show destory ]
+  before_action :check_login, only: %i[ index create show update destroy ]
+  before_action :set_singer, only: %i[ update show destroy ]
 
-  before_action only: %i[ update show destory index ] do has_permission([ "super_admin" ]) end
+  before_action only: %i[ update show destroy index ] do has_permission([ "super_admin", "artist_manager" ]) end
 
   include SingerConcern
 
@@ -33,9 +33,9 @@ class Api::V1::SingersController < ApplicationController
     end
   end
 
-  def destory
-    @singer.destory
-    head 204
+  def destroy
+    @singer.destroy
+    render_success_response(message: "Successfully deleted")
   end
 
   def singermusics
@@ -54,6 +54,14 @@ class Api::V1::SingersController < ApplicationController
     send_data @file, fileName: "singers.csv", type: "text/csv; charset=iso-8859-1; header=present"
   end
 
+  def list
+    # singers list without pagination
+    @singers = Singer.select(
+      :id, :name
+      )
+    render_success_response(data: { singers: @singers }, message: "Singer created successfully")
+  end
+
   private
 
   def set_singer
@@ -61,6 +69,6 @@ class Api::V1::SingersController < ApplicationController
   end
 
   def singer_params
-    params.require(:singer).permit(:name, :dob, :gender, :first_release_year, :no_of_albums_released)
+    params.require(:singer).permit(:name, :dob, :gender, :first_release_year, :no_of_albums_released, :address)
   end
 end
