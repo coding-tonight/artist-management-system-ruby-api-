@@ -28,7 +28,6 @@ class Api::V1::MusicsController < ApplicationController
 
 
  def update
-  puts @music
   if @music.update(music_params)
     render_success_response(data: @music, message: "Music updated successfully")
   else

@@ -5,14 +5,21 @@ class Singer < ApplicationRecord
   enum gender: [ :male, :female, :other ]
 
   has_many :musics, dependent: :destroy
-  belongs_to :user, foreign_key: "user_id"
+  belongs_to :user, foreign_key: "user_id", optional: true
   accepts_nested_attributes_for :musics
   validates :name, uniqueness: true
   validates :gender, inclusion: { in: genders.keys }
 
   def self.import(file)
     CSV.foreach(file.path, headers: true) do |row|
-      Singer.new(row.to_hash).save
+      singer_hash =  row.to_hash
+      singer = Singer.find_or_initialize_by(name: singer_hash["name"])
+      singer.assign_attributes(singer_hash)
+      if singer.save
+        puts "Saved #{singer.name}"
+      else
+        puts "Failed to save #{singer.name}: #{singer.errors.full_messages.join(", ")}"
+      end
     end
   end
 

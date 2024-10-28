@@ -6,9 +6,8 @@ class User < ApplicationRecord
 
   validates :email, uniqueness: true
   validates_format_of :email, with: /@/, format: URI::MailTo::EMAIL_REGEXP
-  validates :password_digest, presence: true
-  # validates :role , inclusion: { in: roles.keys , message: "Invalid gender option"}
-  # validates :gender , inclusion: { in: genders.keys , message: "Invalid role"}
+  validates :password, presence: { on: :create }
+  # validate :password, length: { minimum: 6 }
 
   has_secure_password
 end

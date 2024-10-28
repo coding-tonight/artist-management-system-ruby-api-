@@ -13,6 +13,14 @@ module ApiResponseHandler
     }, status)
   end
 
+  def render_internal_server_response(error)
+    Rails.logger.error(error)
+    json_response({
+      success: false,
+      message: "Ops something went wrong",
+      errors: error }, 500)
+  end
+
   def render_success_response(data: {}, message: "", status: 200, meta: {})
     json_response({
       success: true,
@@ -31,7 +39,8 @@ module ApiResponseHandler
          next_page: collection.next_page,
          prev_page: collection.prev_page,
          total_pages: collection.total_pages,
-         total_count: collection.total_count
+         total_count: collection.total_count,
+         form: (collection.current_page - 1) * 10
         }.merge(extra_meta)
      }
   end
